@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>밸런스 측정</title>
+<style>body { font: 13px monospace; margin: 10px; } table { border-collapse: collapse; } td, th { border: 1px solid #ccc; padding: 2px 6px; text-align: right; }</style>
+</head>
+<body>
+<p>봇이 각 지역을 "그 시점의 평범한 진행 상태"(권장 레벨, 골드를 병종 강화에 고르게, 장수 4명)로 플레이합니다.
+쿼리: <code>diff=1</code>(0 쉬움 … 3 지옥) <code>runs=4</code> <code>lords=liubei,caocao,sunquan</code> <code>stages=1-20</code> <code>items=0</code>(아이템 안 쓰기) <code>lvl=</code>(레벨 더하기) <code>troop=</code>(병종 레벨 더하기)</p>
+<pre id="test-out">측정 중...</pre>
+<script type="module">
+import { LORD_KEYS } from '../js/data.js';
+import { STORIES } from '../js/stories.js';
+import { battleSetup } from '../js/army.js';
+import { autoplay, expectedSave } from '../js/bot.js';
+
+const q = new URLSearchParams(location.search);
+const diff = +(q.get('diff') ?? 1);
+const runs = +(q.get('runs') || 4);
+const lords = (q.get('lords') || LORD_KEYS.join(',')).split(',');
+const [s0, s1] = (q.get('stages') || '1-20').split('-').map(Number);
+const items = q.get('items') !== '0';
+const lvl = +(q.get('lvl') || 0), troop = +(q.get('troop') || 0);
+
+const rows = [];
+const bands = {};
+let all = { n: 0, win: 0 };
+for (let n = s0; n <= (s1 || s0); n++) {
+  let win = 0, time = 0, hp = 0, gate = 0, count = 0, towers = 0;
+  for (const lord of lords) {
+    const save = expectedSave(lord, n, diff, { levelBonus: lvl, troopBonus: troop });
+    const stage = STORIES[lord].stages[n - 1];
+    for (let k = 0; k < runs; k++) {
+      const r = autoplay(battleSetup(save, n - 1, stage, { seed: `b${k}` }), { items, maxTime: 900 });
+      count++;
+      if (r.won) { win++; hp += r.lordHp; }
+      time += r.time;
+      gate += r.gateDown ? 1 : 0;
+      towers += r.towersDown / r.towersTotal;
+    }
+  }
+  const b = Math.floor((n - 1) / 5);
+  bands[b] = bands[b] || { n: 0, win: 0 };
+  bands[b].n += count; bands[b].win += win;
+  all.n += count; all.win += win;
+  rows.push(`${String(n).padStart(2)}  win ${String(Math.round(100 * win / count)).padStart(3)}%  time ${String(Math.round(time / count)).padStart(4)}s  hp(won) ${String(win ? Math.round(100 * hp / win) : 0).padStart(3)}%  gate ${Math.round(100 * gate / count)}%  towers ${Math.round(100 * towers / count)}%`);
+}
+const bandTxt = Object.entries(bands).map(([b, v]) => `${b * 5 + 1}-${b * 5 + 5}: ${Math.round(100 * v.win / v.n)}%`).join(' · ');
+document.getElementById('test-out').textContent = [`diff ${diff} runs ${runs} items ${items ? 'yes' : 'no'} lords ${lords.join(',')}`, ...rows, `total ${Math.round(100 * all.win / all.n)}%  (${bandTxt})`].join('\n');
+</script>
+</body>
+</html>

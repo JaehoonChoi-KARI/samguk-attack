@@ -1,0 +1,126 @@
+/* ---- battle HUD ----------------------------------------------------------------------
+   Keyboard mode: squad buttons at the bottom middle, abilities and items bottom right,
+   each with its key. Touch mode (body.touch-mode): a joystick anywhere on the left, a big
+   attack button bottom right with the abilities around it, items above. */
+
+.bhud { position: absolute; inset: 0; pointer-events: none; font-family: var(--font); color: #fff; }
+.bhud button { pointer-events: auto; touch-action: none; border: 0; padding: 0; position: relative; }
+.touch-only { display: none !important; }
+body.touch-mode .touch-only { display: block !important; }
+body.touch-mode .kbd-only { display: none !important; }
+
+/* top left: the lord and the generals */
+.hud-tl { position: absolute; left: var(--safe-l); top: var(--safe-t); display: flex; flex-direction: column; gap: 6px; }
+.hud-lord { display: flex; align-items: center; gap: 8px; background: rgba(20, 14, 8, 0.72); border-radius: 14px; padding: 5px 12px 5px 5px; border: 2px solid rgba(242, 193, 78, 0.6); }
+.hud-lord img { width: 50px; height: 50px; border-radius: 10px; background: rgba(255, 255, 255, 0.12); }
+.lc-name { font-weight: 900; font-size: 15px; }
+.lc-name small { color: var(--gold); font-weight: 800; }
+.lc-hp { position: relative; width: 190px; height: 16px; background: rgba(0, 0, 0, 0.6); border-radius: 8px; overflow: hidden; margin-top: 3px; }
+.lc-hp i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(#6ee67a, #2fb344); transition: width 0.15s; }
+.lc-hp i.low { background: linear-gradient(#ff7a6b, #d6402f); animation: hpblink 0.6s infinite alternate; }
+.lc-hp span { position: absolute; inset: 0; text-align: center; font-size: 11px; font-weight: 900; line-height: 16px; text-shadow: 0 1px 2px #000; }
+@keyframes hpblink { from { opacity: 1; } to { opacity: 0.6; } }
+.hud-gens { display: flex; gap: 6px; }
+.gen-chip { position: relative; width: 46px; }
+.gen-chip img { width: 44px; height: 44px; display: block; border-radius: 50%; border: 2px solid rgba(242, 193, 78, 0.8); }
+.gen-chip .gc-hp { height: 5px; margin-top: 2px; background: rgba(0, 0, 0, 0.6); border-radius: 3px; overflow: hidden; }
+.gen-chip .gc-hp i { display: block; height: 100%; background: #ffd54f; }
+.gen-chip.down img { filter: grayscale(1) brightness(0.5); }
+.gen-chip .gc-down { position: absolute; left: 0; top: 0; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; text-shadow: 0 1px 3px #000; }
+
+/* top right: stage name and pause */
+.hud-tr { position: absolute; right: var(--safe-r); top: var(--safe-t); display: flex; align-items: center; gap: 8px; }
+.stage-chip { background: rgba(20, 14, 8, 0.72); border-radius: 999px; padding: 6px 14px; font-weight: 800; font-size: 14px; }
+.pause-btn { width: 50px; height: 50px; border-radius: 50%; background: rgba(20, 14, 8, 0.8) !important; color: #fff; font-size: 22px; border: 2px solid rgba(255, 255, 255, 0.35) !important; }
+
+/* enemy general's health, under the field map */
+.hud-boss { position: absolute; left: 50%; top: calc(var(--safe-t) + 112px); transform: translateX(-50%); width: min(460px, 50%); text-align: center; }
+.hud-boss b { font-size: 15px; font-weight: 900; text-shadow: 0 1px 3px #000; color: #ffb0a0; }
+.hud-boss .bb { height: 14px; background: rgba(0, 0, 0, 0.65); border-radius: 7px; overflow: hidden; border: 2px solid rgba(255, 90, 80, 0.7); margin-top: 2px; }
+.hud-boss .bb i { display: block; height: 100%; background: linear-gradient(#ff7a6b, #c62828); }
+
+/* bottom middle: 돌격/모여라, 통솔력 and the six squad buttons */
+.hud-bottom { position: absolute; left: 50%; bottom: var(--safe-b); transform: translateX(-50%); display: flex; align-items: flex-end; gap: 8px; }
+.sq-row { display: flex; gap: 6px; }
+.sq-btn { width: 64px; height: 64px; border-radius: 14px; background: rgba(30, 22, 12, 0.85) !important; border: 2px solid rgba(255, 255, 255, 0.25) !important; overflow: hidden; }
+.sq-btn img { width: 56px; height: 56px; margin-top: 2px; }
+.sq-btn.ready { border-color: rgba(120, 255, 140, 0.85) !important; box-shadow: 0 0 10px rgba(120, 255, 140, 0.45); }
+.sq-btn.full img { opacity: 0.45; }
+.sq-btn.locked { opacity: 0.4; }
+.sq-btn .ld { position: absolute; right: 2px; bottom: 1px; font-size: 10px; font-weight: 900; text-shadow: 0 1px 2px #000; }
+.bhud .key { position: absolute; left: 3px; top: 2px; min-width: 16px; height: 16px; padding: 0 3px; border-radius: 4px; background: rgba(255, 255, 255, 0.9); color: #2a1a0a; font-size: 11px; font-weight: 900; line-height: 16px; text-align: center; z-index: 2; }
+.bhud .cd { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: rgba(0, 0, 0, 0.62); pointer-events: none; }
+.bhud .lock { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.mode-btn { height: 52px; min-width: 92px; padding: 0 10px !important; border-radius: 14px; background: rgba(214, 64, 47, 0.88) !important; color: #fff; font-weight: 900; font-size: 15px; border: 2px solid rgba(255, 255, 255, 0.4) !important; }
+.mode-btn.rally { background: rgba(47, 111, 214, 0.9) !important; }
+.mode-btn .key { left: auto; right: 3px; top: -8px; }
+.lead-chip { align-self: center; background: rgba(20, 14, 8, 0.75); border-radius: 999px; padding: 6px 10px; font-weight: 900; font-size: 14px; white-space: nowrap; }
+
+/* bottom right: items over abilities */
+.hud-br { position: absolute; right: var(--safe-r); bottom: var(--safe-b); display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.it-row, .sk-row { display: flex; gap: 6px; }
+.it-btn { width: 52px; height: 52px; border-radius: 12px; background: rgba(30, 22, 12, 0.85) !important; border: 2px solid rgba(255, 213, 79, 0.55) !important; }
+.it-btn .ico { font-size: 26px; line-height: 50px; }
+.it-btn .cnt { position: absolute; right: 3px; bottom: 1px; font-size: 13px; font-weight: 900; text-shadow: 0 1px 2px #000; }
+.it-btn.empty { opacity: 0.4; }
+.it-btn.hidden-item { display: none; }
+.sk-btn { width: 78px; height: 64px; border-radius: 14px; background: rgba(30, 22, 12, 0.85) !important; border: 2px solid rgba(160, 200, 255, 0.5) !important; overflow: hidden; }
+.sk-btn .ico { display: block; font-size: 26px; margin-top: 4px; }
+.sk-btn .nm { display: block; font-size: 10px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 3px; }
+.sk-btn.ready { border-color: rgba(160, 220, 255, 0.95) !important; box-shadow: 0 0 10px rgba(160, 220, 255, 0.5); }
+.sk-btn.locked { opacity: 0.4; }
+.atk-btn { width: 108px; height: 108px; border-radius: 50%; background: rgba(214, 64, 47, 0.85) !important; border: 3px solid rgba(255, 255, 255, 0.6) !important; font-size: 46px; }
+.atk-btn.pressed { transform: scale(0.94); background: rgba(255, 90, 60, 0.95) !important; }
+.bhud button:active:not(.atk-btn) { transform: scale(0.95); }
+
+/* touch: the joystick zone is the left part of the screen above the squad buttons */
+.joy-zone { position: absolute; left: 0; top: 70px; bottom: 96px; width: 44%; pointer-events: auto; touch-action: none; }
+.joy-base { display: none; position: absolute; left: 130px; bottom: 150px; top: auto; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.3); pointer-events: none; }
+body.touch-mode .joy-base { display: block; }
+.joy-base.active { background: rgba(255, 255, 255, 0.16); border-color: rgba(255, 255, 255, 0.55); bottom: auto; margin: -60px 0 0 -60px; }
+.joy-knob { position: absolute; left: 30px; top: 30px; width: 60px; height: 60px; border-radius: 50%; background: rgba(255, 255, 255, 0.55); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); }
+body.touch-mode .hud-br { bottom: calc(var(--safe-b) + 4px); right: calc(var(--safe-r) + 4px); width: 300px; height: 290px; display: block; }
+body.touch-mode .atk-btn { position: absolute; right: 0; bottom: 0; }
+body.touch-mode .sk-row { position: absolute; right: 0; bottom: 0; width: 300px; height: 290px; display: block; pointer-events: none; }
+body.touch-mode .sk-btn { position: absolute; width: 70px; height: 70px; border-radius: 50%; }
+body.touch-mode .sk-btn .nm { display: none; }
+body.touch-mode .sk-btn .ico { font-size: 30px; margin-top: 14px; }
+body.touch-mode .sk-btn .key { display: none; }
+body.touch-mode .sk-btn[data-i="0"] { right: 124px; bottom: 6px; }
+body.touch-mode .sk-btn[data-i="1"] { right: 108px; bottom: 90px; }
+body.touch-mode .sk-btn[data-i="2"] { right: 30px; bottom: 124px; }
+body.touch-mode .it-row { position: absolute; right: 0; bottom: 214px; }
+body.touch-mode .it-btn .key { display: none; }
+body.touch-mode .hud-bottom { left: calc(50% - 90px); }
+body.touch-mode .sq-btn { width: 60px; height: 60px; }
+body.touch-mode .sq-btn img { width: 52px; height: 52px; }
+
+/* a short message in the middle ("아직 기다려야 해요") */
+.hud-msg { position: absolute; left: 50%; top: 38%; transform: translateX(-50%); padding: 8px 18px; border-radius: 999px; background: rgba(20, 14, 8, 0.85); font-weight: 800; font-size: 16px; opacity: 0; pointer-events: none; white-space: nowrap; }
+.hud-msg.bad { color: #ffb0a0; }
+.hud-msg.show { animation: msg 1.6s ease forwards; }
+@keyframes msg { 0% { opacity: 0; } 10% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
+
+/* 벽력탄: which enemy type */
+.bomb-pick, .guide { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.55); display: flex; align-items: center; justify-content: center; pointer-events: auto; }
+.bp-panel, .g-panel { background: var(--paper); color: var(--ink); border-radius: 18px; padding: 18px 22px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); text-align: center; max-width: 92%; }
+.bp-title { font-weight: 900; font-size: 19px; margin-bottom: 12px; }
+.bp-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.bp-btn { width: 92px; padding: 6px 0 8px !important; border-radius: 12px; background: #fff8e6 !important; border: 2px solid var(--gold2) !important; color: var(--ink); }
+.bp-btn img { width: 56px; height: 56px; display: block; margin: 0 auto; }
+.bp-btn b { font-size: 15px; }
+.bp-btn.off { opacity: 0.35; }
+.bp-btn .key { left: 6px; top: 6px; background: var(--ink); color: #fff; }
+.bp-cancel { margin-top: 14px; padding: 8px 22px !important; border-radius: 999px; background: #d9c9a0 !important; font-weight: 800; color: var(--ink); }
+
+/* first battle: how to play */
+.g-panel h2 { margin-bottom: 10px; }
+.g-cols { display: flex; gap: 14px; text-align: left; }
+.g-col { flex: 1; background: rgba(255, 255, 255, 0.5); border-radius: 12px; padding: 8px 14px; border: 2px solid transparent; }
+.g-col.on { border-color: var(--gold2); background: #fff8e6; }
+.g-col h3 { margin: 4px 0 6px; font-size: 17px; }
+.g-col p { margin: 5px 0; font-size: 15px; }
+.g-goal { font-size: 15px; line-height: 1.5; margin: 12px 0; }
+
+/* preparation screen: the attack goal under the story */
+.goal-line { margin: 4px 0 8px; padding: 6px 10px; border-radius: 10px; background: #fff3c8; border: 2px solid var(--gold2); font-size: 14px; color: var(--ink); }
